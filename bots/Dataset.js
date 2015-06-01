@@ -52,7 +52,7 @@ Bot.prototype.init = function (config) {
 	this.db.connect();
 };
 
-Bot.prototype.exec = function (msg) {
+Bot.prototype.exec = function (msg, callback) {
 	var rs = new Result();
 	var url = msg.url;
 	var body = msg.body;
@@ -61,8 +61,8 @@ Bot.prototype.exec = function (msg) {
 	if(url) {
 		pass = (msg.method == 'GET' && (url.lastIndexOf('/') == url.length - 1) ? 'LIST' : msg.method) + url.split('/').length.toString();
 		uri = url.split('/');
-		table = msg.params.table;
-		id = msg.params.id;
+		table = msg.params.table || msg.params['0'];
+		id = msg.params.id || msg.params['1'];
 		sql = msg.query.sql;
 		query = msg.query.q;
 	}
@@ -79,54 +79,54 @@ Bot.prototype.exec = function (msg) {
 			break;
 
 		case 'FIND':
-			rsdata = this.db.find(table, query);
+			rsdata = this.db.find(table, query, callback);
 			message = "Find Table Data Successful";
 			break;
 		case 'LIST3':
 			if (sql) {
-				rsdata = this.db.sql(sql);
+				rsdata = this.db.sql(sql, callback);
 				message = "SQL Execute Successful";
 			}
 			else {
-				rsdata = this.db.listTable();
+				rsdata = this.db.listTable(callback);
 				message = "List All Table Successful";
 			}
 			break;
 		case 'GET3':
-			rsdata = this.db.getTable(table);
+			rsdata = this.db.getTable(table, callback);
 			message = "Get Table Schema Successful";
 			break;
 		case 'POST3':
 			var schema = body;
-			rsdata = this.db.postTable(table, schema);
+			rsdata = this.db.postTable(table, schema, callback);
 			message = "Create Table Successful";
 			break;
 		case 'PUT3':
 			var schema = body;
-			rsdata = this.db.putTable(table, schema);
+			rsdata = this.db.putTable(table, schema, callback);
 			message = "Modify Table Successful";
 			break;
 		case 'DELETE3':
-			rsdata = this.db.deleteTable(table);
+			rsdata = this.db.deleteTable(table, callback);
 			message = "Delete Table Successful";
 			break;
 		case 'LIST4':
-			rsdata = this.db.pageData(table, query);
+			rsdata = this.db.pageData(table, query, callback);
 			message = "List Data to "+table+" Table Successful";
 			break;
 		case 'GET4':
 			if(id.toLowerCase() == 'clean') {
-				rsdata = this.db.cleanTable(table);
+				rsdata = this.db.cleanTable(table, callback);
 				message = "Table Clean: " + table;
 			}
 			else {
-				rsdata = this.db.getData(table, id);
+				rsdata = this.db.getData(table, id, callback);
 				message = "Get Data from "+table+" Table Successful";
 			}
 			break;
 		case 'POST4':
 			var data = body;
-			rsdata = this.db.postData(table, body);
+			rsdata = this.db.postData(table, body, callback);
 			message = "Insert Data to "+table+" Table Successful";
 			break;
 		case 'PUT4':
@@ -136,12 +136,12 @@ Bot.prototype.exec = function (msg) {
 				message = "Update Data to "+table+" Table Successful";
 			}
 			else {
-				rsdata = this.db.putData(table, id, data);
+				rsdata = this.db.putData(table, id, data, callback);
 				message = "Update or Insert Data to "+table+" Table Successful";
 			}
 			break;
 		case 'DELETE4':
-			rsdata = this.db.deleteData(table, id);
+			rsdata = this.db.deleteData(table, id, callback);
 			message = "Delete Data to "+table+" Table Successful";
 			break;
 

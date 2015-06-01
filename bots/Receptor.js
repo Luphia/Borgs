@@ -95,7 +95,7 @@ Receptor.prototype.init = function(config) {
 	this.app.use(this.filter);
 	this.app.use(express.static(path.join(__dirname, '../public')));
 	this.app.use(this.router);
-	this.app.use(this.response);
+	this.app.use(this.returnData);
 
 	this.ctrl = [];
 
@@ -148,11 +148,12 @@ Receptor.prototype.filter = function(req, res, next) {
 	next();
 };
 
-Receptor.prototype.response = function(req, res, next) {
+Receptor.prototype.returnData = function(req, res, next) {
 	var result = res.result
 	,	session;
 
 	if(result) {
+
 		if(typeof(result.getSession) == 'function') {
 			session = result.getSession();
 
