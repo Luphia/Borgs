@@ -39,7 +39,10 @@ SocketBot.prototype.start = function() {
 	var self = this;
 	SocketBot.super_.prototype.start.apply(this);
 	this.socket = require('socket.io-client')(this.server, {'force new connection': true});
-	this.tag(this.tags);
+
+	this.socket.on('connect', function() {
+		self.tag(self.name);
+	});
 
 	this.socket.on('message', function(msg) {
 		if(msg._response) {
@@ -70,12 +73,11 @@ SocketBot.prototype.tag = function(tag) {
 		for(var k in tag) {
 			this.tag(tag[k]);
 		}
-
-		return true;
 	}
-
-	if(this.tags.indexOf(tag) == -1) { this.tags.push(tag); }
-	if(this.socket) { this.socket.emit('tag', tag); }
+	else {
+		if(this.tags.indexOf(tag) == -1) { this.tags.push(tag); }
+		if(this.socket) { this.socket.emit('tag', tag);}
+	}
 	return true;
 };
 
@@ -133,6 +135,7 @@ SocketBot.prototype.get = function(message) {
 	var self = this;
 	this.exec(message, function(err, data) {
 		self.response(data, message);
+		// console.log(data);
 	});
 };
 SocketBot.prototype.getResponse = function(message) {
@@ -143,6 +146,7 @@ SocketBot.prototype.getResponse = function(message) {
 SocketBot.prototype.response = function(msg, oldMsg) {
 	if(!oldMsg._from) { return false; }
 	if(typeof msg != 'object' || Array.isArray(msg)) { msg = {"data": msg}; }
+	else if(typeof(msg.toJSON) == 'function') { msg = msg.toJSON(); }
 	msg._id = oldMsg._id;
 	msg._response = oldMsg._id;
 	this.peer(msg, oldMsg._from);

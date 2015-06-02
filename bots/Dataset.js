@@ -1,4 +1,21 @@
 /*
+var SB = require('./bots/_SocketBot.js');
+var a = new SB({"tags": ["t1","t2"]});
+a.start();
+
+var msg = {
+"action": "listtable"
+}
+a.random(msg, 1, 'dataset', function(e, d) {
+console.log(d);
+var _msg = {
+"action": "getSchema",
+"table": d.data[0].name
+}
+a.random(_msg, 1, 'dataset', function(_e, _d) {console.log(_d);});
+});
+
+
 # Dataset
 {
 	"column": ["c1", "c2", "c3"],
@@ -49,14 +66,14 @@ Bot.prototype.init = function (config) {
 	];
 
 	this.db = new ecDB();
-	this.db.connect();
+	this.db.connect({}, function() {});
 };
 
 Bot.prototype.exec = function (msg, callback) {
 	var rs = new Result();
 	var url = msg.url;
 	var body = msg.body;
-	var pass, uri, table, sql, query, id, rsdata, info, message;
+	var pass, uri, table, sql, query, schema, id, rsdata, info, message;
 
 	if(url) {
 		pass = (msg.method == 'GET' && (url.lastIndexOf('/') == url.length - 1) ? 'LIST' : msg.method) + url.split('/').length.toString();
@@ -66,6 +83,414 @@ Bot.prototype.exec = function (msg, callback) {
 		sql = msg.query.sql;
 		query = msg.query.q;
 	}
+	else if(typeof(msg.action) == "string") {
+		var action = msg.action.toLowerCase();
+		sql = msg.sql;
+		table = msg.table;
+		schema = msg.schema;
+		query = msg.query;
+		id = msg.id;
+		datarow = msg.datarow;
+		label = msg.label;
+		rtdata = !!msg.rtdata;
+
+		switch(action) {
+			case 'sql':
+				this.db.sql(sql, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "SQL Execute Successful";
+
+					}
+					else {
+						message = "SQL Execute Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});			
+				break;
+
+			case 'getschema':
+				this.db.getTable(table, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Get Table Schema Successful";
+
+					}
+					else {
+						message = "Get Table Schema Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'setschema':
+				this.db.setSchema(table, schema, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Set " + table + " Schema Successful";
+					}
+					else {
+						message = "Get " + table + " Schema Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'listtable':
+				this.db.listTable(function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "List All Table Successful";
+					}
+					else {
+						message = "List All Table Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'gettable':
+				this.db.getTable(table, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Get Table: " + table + " Successful";
+					}
+					else {
+						message = "Get Table: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'posttable':
+				this.db.postTable(table, schema, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Post Table: " + table + " Successful";
+					}
+					else {
+						message = "Post Table: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'puttable':
+				this.db.putTable(table, schema, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Put Table: " + table + " Successful";
+					}
+					else {
+						message = "Put Table: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'cleantable':
+				this.db.cleanTable(table, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Clean Table: " + table + " Successful";
+					}
+					else {
+						message = "Clean Table: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'deletetable':
+				this.db.deleteTable(table, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Delete Table: " + table + " Successful";
+					}
+					else {
+						message = "Delete Table: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'newdataset':
+				this.newDataset(datarow, label, rtdata, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Set new Dataset Successful";
+
+					}
+					else {
+						message = "Set new Dataset Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'listdata':
+				this.db.listData(table, query, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "List Data in " + table + " Successful";
+					}
+					else {
+						message = "List Data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'flowdata':
+				this.db.flowData(table, query, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Flow Data in " + table + " Successful";
+					}
+					else {
+						message = "Flow Data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'pagedata':
+				this.db.listData(table, query, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Page Data in " + table + " Successful";
+					}
+					else {
+						message = "Page Data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'getdata':
+				this.db.getData(table, id, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Get Data in " + table + " Successful";
+					}
+					else {
+						message = "Get Data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'find':
+				this.db.find(table, query, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Find Data in " + table + " Successful";
+					}
+					else {
+						message = "Find Data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'datafind':
+				this.db.dataFind(datarow, sql, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Find Data Successful";
+					}
+					else {
+						message = "Find Data Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'postdata':
+				this.db.postData(table, datarow, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Insert into " + table + " Successful";
+					}
+					else {
+						message = "Insert into " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'updatedata':
+				this.db.updateData(table, query, datarow, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Update data in " + table + " Successful";
+					}
+					else {
+						message = "Update data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'replacedata':
+				this.db.replaceData(table, id, datarow, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Replace data in " + table + " Successful";
+					}
+					else {
+						message = "Replace data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'putdata':
+				this.db.putData(table, id, datarow, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Put data in " + table + " Successful";
+					}
+					else {
+						message = "Put data in " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+			case 'deletedata':
+				this.db.deleteData(table, query, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Delete data from " + table + " Successful";
+					}
+					else {
+						message = "Delete data from " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+				break;
+
+			default:
+				rsdata = msg;
+				message = "Debug Message";
+				rs.setResult(0);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+				break;
+		}
+
+		return true;
+	}
 	else {
 		pass = 'newDataset';
 	}
@@ -74,90 +499,315 @@ Bot.prototype.exec = function (msg, callback) {
 		case 'newDataset':
 			var label = msg.query.label;
 			var response = msg.query.response
-			rsdata = this.newDataset(msg.body, label, response);
-			message = "Set new "+msg.body+" Dataset Successful";
+			this.newDataset(msg.body, label, response, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Set new Dataset Successful";
+
+				}
+				else {
+					message = "Set new Dataset Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
+			
 			break;
 
 		case 'FIND':
-			rsdata = this.db.find(table, query, callback);
-			message = "Find Table Data Successful";
+			this.db.find(table, query, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Find Table Data Successful";
+
+				}
+				else {
+					message = "Find Table Data Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'LIST3':
 			if (sql) {
-				rsdata = this.db.sql(sql, callback);
-				message = "SQL Execute Successful";
+				this.db.sql(sql, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "SQL Execute Successful";
+
+					}
+					else {
+						message = "SQL Execute Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			else {
-				rsdata = this.db.listTable(callback);
-				message = "List All Table Successful";
+				this.db.listTable(function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "List All Table Successful";
+
+					}
+					else {
+						message = "List All Table Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			break;
 		case 'GET3':
-			rsdata = this.db.getTable(table, callback);
-			message = "Get Table Schema Successful";
+			this.db.getTable(table, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Get Table Schema Successful";
+
+				}
+				else {
+					message = "Get Table Schema Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'POST3':
 			var schema = body;
-			rsdata = this.db.postTable(table, schema, callback);
-			message = "Create Table Successful";
+			this.db.postTable(table, schema, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Create Table Successful";
+
+				}
+				else {
+					message = "Create Table Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'PUT3':
 			var schema = body;
-			rsdata = this.db.putTable(table, schema, callback);
-			message = "Modify Table Successful";
+			this.db.putTable(table, schema, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Modify Table Successful";
+
+				}
+				else {
+					message = "Modify Table Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'DELETE3':
-			rsdata = this.db.deleteTable(table, callback);
-			message = "Delete Table Successful";
+			this.db.deleteTable(table, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Delete Table Successful";
+
+				}
+				else {
+					message = "Delete Table Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'LIST4':
-			rsdata = this.db.pageData(table, query, callback);
-			message = "List Data to "+table+" Table Successful";
+			this.db.pageData(table, query, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "List Data in " + table + " Successful";
+
+				}
+				else {
+					message = "List Data in " + table + " Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'GET4':
 			if(id.toLowerCase() == 'clean') {
-				rsdata = this.db.cleanTable(table, callback);
-				message = "Table Clean: " + table;
+				this.db.cleanTable(table, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Table Clean: " + table;
+
+					}
+					else {
+						message = "Table Clean: " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			else {
-				rsdata = this.db.getData(table, id, callback);
-				message = "Get Data from "+table+" Table Successful";
+				this.db.getData(table, id, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Get Data from " + table + " Table Successful";
+
+					}
+					else {
+						message = "Get Data from " + table + " Table Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			break;
 		case 'POST4':
 			var data = body;
-			rsdata = this.db.postData(table, body, callback);
-			message = "Insert Data to "+table+" Table Successful";
+			this.db.postData(table, body, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Insert Data into " + table + " Successful";
+
+				}
+				else {
+					message = "Insert Data into " + table + " Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 		case 'PUT4':
 			var data = body;
 			if (query) {
-				rsdata = this.db.updateData(table, id, data);
-				message = "Update Data to "+table+" Table Successful";
+				this.db.updateData(table, id, data, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Update Data from " + table + " Successful";
+
+					}
+					else {
+						message = "Update Data from " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			else {
-				rsdata = this.db.putData(table, id, data, callback);
-				message = "Update or Insert Data to "+table+" Table Successful";
+				this.db.putData(table, id, data, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Update or Insert Data into " + table + " Successful";
+
+					}
+					else {
+						message = "Update or Insert Data into " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
 			}
 			break;
 		case 'DELETE4':
-			rsdata = this.db.deleteData(table, id, callback);
-			message = "Delete Data to "+table+" Table Successful";
+			this.db.deleteData(table, id, function(err, data) {
+				var rscode = !err? 1: 0;
+				var rsdata = err || data;
+				if(!err) {
+					message = "Delete Data from " + table + " Successful";
+
+				}
+				else {
+					message = "Delete Data from " + table + " Fail";
+				}
+
+				rs.setResult(rscode);
+				rs.setMessage(message);
+				rs.setData(rsdata);
+
+				callback(false, rs);
+			});
 			break;
 
 		default:
 			rsdata = msg;
 			message = "Debug Message";
+			rs.setResult(0);
+			rs.setMessage(message);
+			rs.setData(rsdata);
+
+			callback(false, rs);
 			break;
 	}
 
-	if(rsdata) {
-		rs.setResult(1);
-		rs.setMessage(message);
-		rs.setData(rsdata);
-	}
-
-	return rs;
+	return true;
 };
 
 Bot.prototype.newDataset = function(dataset, label, response) {

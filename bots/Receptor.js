@@ -111,7 +111,7 @@ Receptor.prototype.init = function(config) {
 			"files": req.files
 		};
 
-		self.broadcast(msg, req.params.tag, function(e, d) {
+		self.random(msg, 1, req.params.bot, function(e, d) {
 			if(d.length == 1) {
 				d = d[0];
 			}

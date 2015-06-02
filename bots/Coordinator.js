@@ -104,12 +104,14 @@ Coordinator.prototype.tag = function(client, tag) {
 		}
 	}
 
-	if(!this.tags[tag]) {
-		this.tags[tag] = [];
-	}
+	if(!!tag) {
+		if(!this.tags[tag]) {
+			this.tags[tag] = [];
+		}
 
-	if(this.tags[tag].indexOf(client) == -1) {
-		this.tags[tag].push(client);
+		if(this.tags[tag].indexOf(client) == -1) {
+			this.tags[tag].push(client);
+		}
 	}
 };
 

@@ -11,10 +11,7 @@ var fs = require('fs')
 ,	Receptor = require('../bots/Receptor.js')
 ,	coordinator = new Coordinator();
 
-
 coordinator.start();
-
-
 
 for(var key in files) {
 	if(reg.test(files[key]) && files[key].indexOf("_") == -1 && skip.indexOf(files[key]) == -1 ) {
@@ -25,18 +22,15 @@ for(var key in files) {
 
 		tagArr.pop();
 		tag = tagArr.join(".");
-		ltag = tag.toLowerCase();
-		bot.tag(tag);
-		bot.tag(ltag);
 		bot.name = tag;
 
 		bots.push(bot);
-		bot.init();
 	}
 }
 
 for(var k in bots) {
 	bots[k].start();
+	bot.tag(bot.name.toLowerCase());
 }
 
 

@@ -136,6 +136,7 @@ Bot.prototype.done = function(event, data) {
 	this.waiting[event] = this.waiting[event] < 0? 0: this.waiting[event];
 
 	if(this.waiting[event] == 0) {
+		if(this.result[event].length == 1) { this.result[event] = this.result[event][0]; }
 		this.cbReturn(false, this.result[event], this.callback[event]);
 		this.cleanEvent(event);
 	}
