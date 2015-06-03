@@ -30,9 +30,12 @@ for(var key in files) {
 
 for(var k in bots) {
 	bots[k].start();
-	bot.tag(bot.name.toLowerCase());
+	bots[k].tag(bots[k].name.toLowerCase());
 }
 
 
 var receptor = new Receptor();
 receptor.start();
+for(var k in bots) {
+	receptor.registPath(bots[k].path, bots[k].name)
+}

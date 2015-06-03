@@ -98,28 +98,54 @@ Receptor.prototype.init = function(config) {
 	this.app.use(this.returnData);
 
 	this.ctrl = [];
+};
 
-	this.router.all('/:bot/*', function(req, res, next) {
-		var msg = {
-			"url": req._parsedOriginalUrl.pathname,
-			"method": req.method,
-			"params": req.params,
-			"query": req.query,
-			"body": req.body,
-			"sessionID": req.sessionID,
-			"session": req.session,
-			"files": req.files
-		};
+Receptor.prototype.exec = function(msg, callback) {
+	msg = msg || {};
+	var action = new String(msg.action).toLowerCase();
 
-		self.random(msg, 1, req.params.bot, function(e, d) {
-			if(d.length == 1) {
-				d = d[0];
-			}
+	switch(msg.action) {
+		case 'registpath':
+			this.registPath(msg.path, msg.botname);
+			break;
+	}
+};
+Receptor.prototype.registPath = function(path, botname) {
+	var self = this;
+	if(util.isArray(path)) {
+		for(var k in path) {
+			this.registPath(path[k], botname);
+		}
+	}
+	else if(!!path) {
+		if(typeof(path) == "string") { path = {"method": "all", "path": path}; }
+		var method = (path.method || 'all').toLowerCase()
+		,	path = path.path;
 
-			res.result = new Result(d);
-			next();
-		});
-	})
+		if(typeof(this.router[method]) == "function") {
+			this.router[method](path, function(req, res, next) {
+				var msg = {
+					"url": req._parsedOriginalUrl.pathname,
+					"method": req.method,
+					"params": req.params,
+					"query": req.query,
+					"body": req.body,
+					"sessionID": req.sessionID,
+					"session": req.session,
+					"files": req.files
+				};
+
+				self.random(msg, 1, botname, function(e, d) {
+					if(d.length == 1) {
+						d = d[0];
+					}
+
+					res.result = new Result(d);
+					next();
+				});
+			});
+		}
+	}
 };
 
 Receptor.prototype.start = function() {
