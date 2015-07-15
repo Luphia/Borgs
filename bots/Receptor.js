@@ -33,6 +33,9 @@ var SocketBot = require('./_SocketBot.js')
 ,	exec = require('child_process').exec
 ,	Result = require('../classes/Result.js');
 
+var pathCert = __dirname + '/../config/cert.pfx'
+,	pathPw = __dirname + '/../config/pw.txt';
+
 var Receptor = function(config) {
 	this.init(config);
 };
@@ -43,6 +46,7 @@ Receptor.prototype.init = function(config) {
 	Receptor.super_.prototype.init.call(this, config);
 	var self = this;
 	this.serverPort = [3000, 80];
+	this.httpsPort = [4000, 443];
 	this.modules = {};
 
 	var upload = "./uploads/";
@@ -80,6 +84,30 @@ Receptor.prototype.init = function(config) {
 		console.log('Receptor is listening on port: %d', self.listening);
 	});
 
+	// if has pxf -> create https service
+	if(fs.existsSync(pathCert)) {
+		this.pfx = fs.readFileSync(pathCert);
+		this.pfxpw = fs.readFileSync(pathPw);
+
+		this.https = require('https').createServer({
+			pfx: this.pfx,
+			passphrase: this.pfxpw
+		}, this.app);
+		this.https.on('error', function(err) {
+			if(err.syscall == 'listen') {
+				var nextPort = self.httpsPort.pop() || self.listeningHttps + 1;
+				self.startServer(nextPort);
+			}
+			else {
+				throw err;
+			}
+		});
+
+		this.https.on('listening', function() {
+			console.log('Receptor is listening on port: %d', self.listeningHttps);
+		});
+	}
+
 	this.session = Session({
 		secret: this.randomID(),
 		resave: true,
@@ -87,6 +115,7 @@ Receptor.prototype.init = function(config) {
 	});
 
 	this.app.set('port', this.serverPort.pop());
+	this.app.set('portHttps', this.httpsPort.pop());
 	this.app.use(log4js.connectLogger(log4js.getLogger('catering.log'), { level: log4js.levels.INFO, format: ':remote-addr :user-agent :method :url :status - :response-time ms' }));
 	this.app.use(this.session);
 	this.app.use(bodyParser.urlencoded({ extended: false }));
@@ -151,19 +180,29 @@ Receptor.prototype.registPath = function(path, botname) {
 Receptor.prototype.start = function() {
 	Receptor.super_.prototype.start.apply(this);
 	var self = this;
-	
+
 	var httpPort = this.app.get('port');
-	this.startServer(httpPort);
+	var httpsPort = this.app.get('portHttps');
+	this.startServer(httpPort, httpsPort);
 };
 
-Receptor.prototype.startServer = function(port) {
+Receptor.prototype.startServer = function(port, httpsPort) {
 	this.listening = port;
+	this.listeningHttps = httpsPort;
 	this.http.listen(port, function() {});
+
+	if(this.pfx) {
+		this.https.listen(httpsPort, function() {});
+	}
 }
 
 Receptor.prototype.stop = function() {
 	Receptor.super_.prototype.stop.apply(this);
 	this.http.close();
+
+	if(this.pfx) {
+		this.https.close();
+	}
 };
 
 Receptor.prototype.filter = function(req, res, next) {

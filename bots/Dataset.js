@@ -47,7 +47,6 @@ a.random(_msg, 1, 'dataset', function(_e, _d) {console.log(_d);});
 var ParentBot = require('./_SocketBot.js')
 ,	util = require('util')
 ,	ecDB = require('ecdb')
-,	ecFile = require('ecfile')
 ,	Result = require('../classes/Result.js');
 
 var Bot = function (config) {
@@ -64,9 +63,6 @@ Bot.prototype.init = function (config) {
 		{"method": "all", "path": "/dataset/:table"},
 		{"method": "all", "path": "/dataset/:table/:id"}
 	];
-
-	this.db = new ecDB();
-	this.db.connect({}, function() {});
 };
 
 Bot.prototype.exec = function (msg, callback) {

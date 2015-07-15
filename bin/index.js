@@ -9,8 +9,11 @@ var fs = require('fs')
 ,	skip = ["Coordinator.js", "Receptor.js"]
 ,	Coordinator = require('../bots/Coordinator.js')
 ,	Receptor = require('../bots/Receptor.js')
-,	coordinator = new Coordinator();
+,	ecDB = require('ecdb')
+,	coordinator = new Coordinator()
+,	ecdb = new ecDB();
 
+ecdb.connect();
 coordinator.start();
 
 for(var key in files) {
@@ -23,6 +26,7 @@ for(var key in files) {
 		tagArr.pop();
 		tag = tagArr.join(".");
 		bot.name = tag;
+		bot.db = ecdb;
 
 		bots.push(bot);
 	}
