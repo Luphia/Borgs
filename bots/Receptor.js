@@ -19,19 +19,19 @@ receptor.start();
 
 */
 
-var SocketBot = require('./_SocketBot.js')
-,	util = require('util')
-,	log4js = require('log4js')
-,	express = require('express')
-,	Session = require('express-session')
-,	favicon = require('serve-favicon')
-,	fs = require('fs')
-,	path = require('path')
-,	bodyParser = require('body-parser')
-,	multer  = require('multer')
-,	ncp = require('ncp').ncp
-,	exec = require('child_process').exec
-,	Result = require('../classes/Result.js');
+var SocketBot = require('./_SocketBot.js'),
+	util = require('util'),
+	log4js = require('log4js'),
+	express = require('express'),
+	Session = require('express-session'),
+	favicon = require('serve-favicon'),
+	fs = require('fs'),
+	path = require('path'),
+	bodyParser = require('body-parser'),
+	multer  = require('multer'),
+	ncp = require('ncp').ncp,
+	exec = require('child_process').exec,
+	Result = require('../classes/Result.js');
 
 var pathCert = __dirname + '/../config/cert.pfx'
 ,	pathPw = __dirname + '/../config/pw.txt';
@@ -48,25 +48,11 @@ Receptor.prototype.init = function(config) {
 	this.serverPort = [3000, 80];
 	this.httpsPort = [4000, 443];
 	this.modules = {};
+	this.logger = config.log4js;
 
-	var upload = "./uploads/";
-	if (!fs.existsSync(upload)){
-		fs.mkdirSync(upload);
-	}
-	var logs = "./logs/";
-	if (!fs.existsSync(logs)){
-		fs.mkdirSync(logs);
-	}
-
-	log4js.configure({
-		"appenders": [
-			{ "type": "console" },
-			{ "type": "dateFile", "filename": "./logs/catering", "category": "catering.log", "pattern": "-yyyy-MM-dd.log", "alwaysIncludePattern": true, "backups": 365 },
-			{ "type": "file", "filename": "./logs/catering.exception.log", "category": "catering.exception", "maxLogSize": 10485760, "backups": 10 },
-			{ "type": "file", "filename": "./logs/catering.threat.log", "category": "catering.threat", "maxLogSize": 10485760, "backups": 10 }
-		],
-		"replaceConsole": true
-	});
+	var folders = config.path || {};
+	var upload = folders.upload || "./uploads/";
+	var logs = folders.logs || "./logs/";
 
 	this.router = express.Router();
 	this.app = express();
@@ -116,11 +102,11 @@ Receptor.prototype.init = function(config) {
 
 	this.app.set('port', this.serverPort.pop());
 	this.app.set('portHttps', this.httpsPort.pop());
-	this.app.use(log4js.connectLogger(log4js.getLogger('catering.log'), { level: log4js.levels.INFO, format: ':remote-addr :user-agent :method :url :status - :response-time ms' }));
+	this.app.use(log4js.connectLogger(this.logger.getLogger('info'), { level: log4js.levels.INFO, format: ':remote-addr :user-agent :method :url :status - :response-time ms' }));
 	this.app.use(this.session);
 	this.app.use(bodyParser.urlencoded({ extended: false }));
 	this.app.use(bodyParser.json({limit: '10mb'}));
-	this.app.use(multer({ dest: './uploads/', limit: '10mb'}));
+	this.app.use(multer({ dest: upload, limit: '10mb'}));
 	this.app.use(this.filter);
 	this.app.use(express.static(path.join(__dirname, '../public')));
 	this.app.use(this.router);
@@ -180,7 +166,7 @@ Receptor.prototype.registPath = function(path, botname) {
 Receptor.prototype.start = function() {
 	Receptor.super_.prototype.start.apply(this);
 	var self = this;
-
+	
 	var httpPort = this.app.get('port');
 	var httpsPort = this.app.get('portHttps');
 	this.startServer(httpPort, httpsPort);

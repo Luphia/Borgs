@@ -29,6 +29,10 @@ Bot.prototype.init = function(config) {
 	this.waiting = {};
 	this.result = {};
 	this.callback = {};
+
+	if(!!config) {
+		this.db = config.db;
+	}
 };
 
 Bot.prototype.start = function() {
