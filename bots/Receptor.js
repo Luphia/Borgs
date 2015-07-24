@@ -193,6 +193,8 @@ Receptor.prototype.stop = function() {
 
 Receptor.prototype.filter = function(req, res, next) {
 	var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+	parseIP = ip.match(/\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b/);
+	ip = !!parseIP? parseIP[0]: ip;
 	if(!req.session.ip) { req.session.ip = ip; }
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
