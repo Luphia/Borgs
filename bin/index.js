@@ -8,13 +8,11 @@ var fs = require('fs'),
 	folder = path.join(__dirname, "../bots/"),
 	files = fs.readdirSync(folder),
 	bots = [],
-	skip = ["Coordinator.js", "Receptor.js", "Channel.js"],
+	skip = ["Coordinator.js", "Receptor.js"],
 	Coordinator = require('../bots/Coordinator.js'),
 	Receptor = require('../bots/Receptor.js'),
-	Channel = require('../bots/Channel.js'),
 	ecDB = require('ecdb'),
 	coordinator = new Coordinator(),
-	channel = new Channel(),
 	ecdb = new ecDB();
 
 // initial folder
@@ -85,7 +83,3 @@ receptor.start();
 for(var k in bots) {
 	receptor.registPath(bots[k].path, bots[k].name)
 }
-
-channel.setApp( receptor.http, receptor.https );
-channel.db = ecdb;
-channel.start();
