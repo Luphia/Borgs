@@ -44,7 +44,9 @@ Bot.prototype.stop = function() {
 };
 
 Bot.prototype.reset = function() {
-
+	this.stop();
+	this.init(this.config);
+	this.start();
 };
 
 Bot.prototype.cbReturn = function(err, data, callback) {

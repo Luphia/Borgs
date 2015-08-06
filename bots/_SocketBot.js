@@ -32,6 +32,7 @@ SocketBot.prototype.init = function(config) {
 	SocketBot.super_.prototype.init.call(this, config);
 	this.server = config.server || 'ws://127.0.0.1:2266';
 	this.tags = config.tags || [];
+	this.readyToAsk = false;
 };
 
 SocketBot.prototype.start = function() {
@@ -164,6 +165,7 @@ SocketBot.prototype.record = function(table, data) {
 SocketBot.prototype.setAsk = function(func) {
 	if(typeof(func) == "function") {
 		this.ask = func;
+		this.readyToAsk = true;
 	}
 }
 SocketBot.prototype.ask = function(message, target, callback) {
