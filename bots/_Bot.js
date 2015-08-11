@@ -35,8 +35,10 @@ Bot.prototype.init = function(config) {
 	}
 };
 
-Bot.prototype.start = function() {
+Bot.prototype.start = function(callback) {
 	this.active = true;
+
+	if(typeof(callback) == 'function') { callback(); }
 };
 
 Bot.prototype.stop = function() {
