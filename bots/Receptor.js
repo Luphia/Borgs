@@ -20,21 +20,21 @@ receptor.start();
 */
 
 var SocketBot = require('./_SocketBot.js'),
-	util = require('util'),
-	log4js = require('log4js'),
-	express = require('express'),
-	Session = require('express-session'),
-	favicon = require('serve-favicon'),
-	fs = require('fs'),
-	path = require('path'),
-	bodyParser = require('body-parser'),
-	multer  = require('multer'),
-	ncp = require('ncp').ncp,
-	exec = require('child_process').exec,
-	Result = require('../classes/Result.js');
+		util = require('util'),
+		log4js = require('log4js'),
+		express = require('express'),
+		Session = require('express-session'),
+		favicon = require('serve-favicon'),
+		fs = require('fs'),
+		path = require('path'),
+		bodyParser = require('body-parser'),
+		multer  = require('multer'),
+		ncp = require('ncp').ncp,
+		exec = require('child_process').exec,
+		Result = require('../classes/Result.js');
 
-var pathCert = __dirname + '/../config/cert.pfx'
-,	pathPw = __dirname + '/../config/pw.txt';
+var pathCert = __dirname + '/../config/cert.pfx',
+		pathPw = __dirname + '/../config/pw.txt';
 
 var Receptor = function(config) {
 	this.init(config);
@@ -48,7 +48,7 @@ Receptor.prototype.init = function(config) {
 	this.serverPort = [3000, 80];
 	this.httpsPort = [4000, 443];
 	this.modules = {};
-	this.logger = config.log4js;
+	logger = config.logger;
 
 	var folders = config.path || {};
 	var upload = folders.upload || "./uploads/";
@@ -102,7 +102,7 @@ Receptor.prototype.init = function(config) {
 
 	this.app.set('port', this.serverPort.pop());
 	this.app.set('portHttps', this.httpsPort.pop());
-	this.app.use(log4js.connectLogger(this.logger.getLogger('info'), { level: log4js.levels.INFO, format: ':remote-addr :user-agent :method :url :status - :response-time ms' }));
+	this.app.use(log4js.connectLogger(logger.info, { level: log4js.levels.INFO, format: ':remote-addr :user-agent :method :url :status - :response-time ms' }));
 	this.app.use(this.session);
 	this.app.use(bodyParser.urlencoded({ extended: false }));
 	this.app.use(bodyParser.json({limit: '10mb'}));
@@ -166,9 +166,9 @@ Receptor.prototype.registPath = function(path, botname) {
 Receptor.prototype.start = function() {
 	Receptor.super_.prototype.start.apply(this);
 	var self = this;
-
 	var httpPort = this.app.get('port');
 	var httpsPort = this.app.get('portHttps');
+	this.router.use(this.errorHandler);
 	this.startServer(httpPort, httpsPort);
 };
 
@@ -199,6 +199,12 @@ Receptor.prototype.filter = function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
 	next();
+};
+
+Receptor.prototype.errorHandler = function (err, req, res, next) {
+	logger.exception.error(err);
+	res.statusCode = 500;
+	res.json({result: 0, message: 'oops, something wrong...'});
 };
 
 Receptor.prototype.returnData = function(req, res, next) {

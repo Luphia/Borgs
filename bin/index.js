@@ -24,7 +24,7 @@ var dataset = path.join(homepath, "dataset/");
 
 var folders = {
 	home: homepath,
-	upload: upload, 
+	upload: upload,
 	logs: logs
 };
 
@@ -49,9 +49,15 @@ log4js.configure({
 	"replaceConsole": true
 });
 
+var logger = {
+	info: log4js.getLogger('info'),
+	exception: log4js.getLogger('exception'),
+	threatPath: log4js.getLogger('threat')
+};
+
 var options = {
 	path: folders,
-	log4js: log4js,
+	logger: logger,
 	db: ecdb
 };
 

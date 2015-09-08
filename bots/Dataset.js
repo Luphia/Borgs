@@ -108,7 +108,7 @@ Bot.prototype.exec = function (msg, callback) {
 					rs.setData(rsdata);
 
 					callback(false, rs);
-				});			
+				});
 				break;
 
 			case 'getschema':
@@ -512,7 +512,7 @@ Bot.prototype.exec = function (msg, callback) {
 
 				callback(false, rs);
 			});
-			
+
 			break;
 
 		case 'FIND':
@@ -773,23 +773,43 @@ Bot.prototype.exec = function (msg, callback) {
 			}
 			break;
 		case 'DELETE4':
-			this.db.deleteData(table, id, function(err, data) {
-				var rscode = !err? 1: 0;
-				var rsdata = err || data;
-				if(!err) {
-					message = "Delete Data from " + table + " Successful";
+			if(id === undefined) {
+				this.db.cleanTable(table, function(e, d) {
+					var rscode = !e? 1: 0;
+					var rsdata = e || d;
+					if(!e) {
+						message = "Clean Table: " + table + " Successful";
+					}
+					else {
+						message = "Clean Table: " + table + " Fail";
+					}
 
-				}
-				else {
-					message = "Delete Data from " + table + " Fail";
-				}
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
 
-				rs.setResult(rscode);
-				rs.setMessage(message);
-				rs.setData(rsdata);
+					callback(false, rs);
+				});
+			}
+			else {
+				this.db.deleteData(table, id, function(err, data) {
+					var rscode = !err? 1: 0;
+					var rsdata = err || data;
+					if(!err) {
+						message = "Delete Data from " + table + " Successful";
 
-				callback(false, rs);
-			});
+					}
+					else {
+						message = "Delete Data from " + table + " Fail";
+					}
+
+					rs.setResult(rscode);
+					rs.setMessage(message);
+					rs.setData(rsdata);
+
+					callback(false, rs);
+				});
+			}
 			break;
 
 		default:
@@ -852,7 +872,7 @@ Bot.prototype.mergeData = function() {
 };
 
 Bot.prototype.innerJoin = function() {
-	
+
 };
 
 Bot.prototype.leftJoin = function() {
