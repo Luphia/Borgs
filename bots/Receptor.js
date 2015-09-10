@@ -197,6 +197,7 @@ Receptor.prototype.filter = function(req, res, next) {
 	ip = !!parseIP? parseIP[0]: ip;
 	if(!req.session.ip) { req.session.ip = ip; }
     res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
     res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
 	next();
 };
