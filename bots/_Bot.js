@@ -54,8 +54,8 @@ Bot.prototype.reset = function() {
 Bot.prototype.cbReturn = function(err, data, callback) {
 	if(typeof(callback) != 'function') {
 		callback = function(err, data) {
-			err && (console.log(err));
-			data && (console.log(data));
+			//err && (console.log(err));
+			//data && (console.log(data));
 		};
 	}
 
