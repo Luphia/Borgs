@@ -82,7 +82,7 @@ Receptor.prototype.init = function(config) {
 		this.https.on('error', function(err) {
 			if(err.syscall == 'listen') {
 				var nextPort = self.httpsPort.pop() || self.listeningHttps + 1;
-				self.startServer(nextPort);
+				self.startServer(undefined, nextPort);
 			}
 			else {
 				throw err;
@@ -173,11 +173,12 @@ Receptor.prototype.start = function() {
 };
 
 Receptor.prototype.startServer = function(port, httpsPort) {
-	this.listening = port;
-	this.listeningHttps = httpsPort;
-	this.http.listen(port, function() {});
-
-	if(this.pfx) {
+	if(port) {
+		this.listening = port;
+		this.http.listen(port, function() {});
+	}
+	if(httpsPort && this.pfx) {
+		this.listeningHttps = httpsPort;
 		this.https.listen(httpsPort, function() {});
 	}
 }
